@@ -5,4 +5,4 @@ exchange.network.on('ready', async () => {
     const order = await exchange.createOrder('SELL', 1, 'BTC', 'abc.eth')
     await setTimeout(5000)
     console.log(exchange.getOrderbook())
-}
+})
