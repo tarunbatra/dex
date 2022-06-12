@@ -94,13 +94,16 @@ class Network extends EventEmitter {
     async lock(key) {
         return new Promise((resolve, reject) => {
             debug("CLIENT", `Locking ${key}`)
+            // TODO: Do not use this bittorent inspired method to lock the keys
             const DHTKey = utils.getDhtKey(key)
+            // Try to see if the key is already locked
             this.link.get(DHTKey, {}, (err, locked) => {
                 if (err && err.message !== constants.FirstNodeError) {
                     return reject(err)
                 } else if (locked) {
                     return reject(new Error("The key is already locked"))
                 } else {
+                    // If the key is not locked, try to acquire the lock
                     this.link.put(key, {}, (err, hash) => {
                         if (err && err.message !== constants.FirstNodeError) {
                             return reject(err)

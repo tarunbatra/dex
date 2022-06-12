@@ -14,6 +14,7 @@ class Exchange {
         this.network = network
         this.orderbook = new Map()
 
+        // Update orderbook on message from peers
         network.on(Network.Channels.SYNC_ORDER, (order) => {
             const orderId = order.id
             this.orderbook.set(orderId, order)
@@ -48,6 +49,7 @@ class Exchange {
         if (!order) {
             return new Error(`Not Found: Order #${orderId}`)
         }
+        // Locking the order is required before changing its state
         const locked = lockOrder(order, this.network)
         if(locked) {
             order.state = Order.State.CANCELED
@@ -65,15 +67,26 @@ class Exchange {
         const order1 = this.orderbook.get(orderId1)
         const order2 = this.orderbook.get(orderId2)
 
-        [ lockedOrder1, lockedOrder2 ] = await Promise.all([unlockOrder(order1), unlockOrder(order2)])
+        // Locking the order is required before changing its state
+        [ lockedOrder1, lockedOrder2 ] = await Promise.all([
+            unlockOrder(order1, this.network),
+            unlockOrder(order2, this.network)
+        ])
         if (!lockedOrder1 || !lockedOrder2) {
             throw new Error("FAILED: Order already under processing")
         }
         await this.processTrade(order1, order2)
         this.orderbook.set(orderId1, order1)
         this.orderbook.set(orderId2, order2)
-        await Promise.all([syncOrder(order1, this.network), syncOrder(order2, this.network)])
-        await Promise.all([unlockOrder(order1, this.network), unlockOrder(order2. this.network)])
+        await Promise.all([
+            syncOrder(order1, this.network),
+            syncOrder(order2, this.network)
+        ])
+        // TODO: Check for errors here
+        await Promise.all([
+            unlockOrder(order1, this.network),
+            unlockOrder(order2. this.network)
+        ])
         return true
     }
 
@@ -93,15 +106,18 @@ class Exchange {
         if (one.quantity > two.quantity) {
             one.filledQuantity = one.filledQuantity - two.quantity
             two.filledQuantity = two.quantity
+            // Create order for the reamining quantity and complete this order
             await this.createOrder(two.type, two.quantity - two.filledQuantity, two.ticker, two.usr)
         } else if (two.quantity > one.quantity) {
             two.filledQuantity = one.quantity
             one.filledQuantity = one.quantity
+            // Create order for the reamining quantity and complete this order
             await this.createOrder(one.type, one.quantity - one.filledQuantity, one.ticker, one.usr)
         } else {
             two.filledQuantity = two.quantity
             one.filledQuantity = one.quantity
         }
+        // Mark both the orders completed
         two.state = Order.State.COMPLETED
         one.state = Order.State.COMPLETED
     }
