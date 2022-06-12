@@ -1,5 +1,9 @@
 # Decentralized Exchange (DEX)
 
+The decentralized exchange is created using [Grenache](https://github.com/bitfinexcom/grenache).
+It has two distinct layers:
+- [__Network layer__](./network.js): Responsible for interacting with DHT and peers
+- [__Exchange layer__](./exchange.js): encodes functionality of the exchange
 
 ## Setup
 
