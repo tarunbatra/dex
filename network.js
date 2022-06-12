@@ -1,3 +1,10 @@
+/**
+ * Represents the network layer required for the dex to work
+ * including methods to send and broadcast data;
+ * event hooks to receive data from peers;
+ * lock and unlock keys using DHT
+ * */
+
 'use strict'
 const EventEmitter = require('events')
 const { PeerRPCServer, PeerRPCClient } = require('grenache-nodejs-http')

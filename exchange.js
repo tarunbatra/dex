@@ -1,3 +1,9 @@
+/**
+ * Represents the functioning of the exchange
+ * including methods to create, caancel, match orders
+ * using the network layer
+ */
+
 const { v4: uuid } = require('uuid')
 const debug = require('debug')('dex:exchange')
 const Network = require('./network')
