@@ -34,6 +34,7 @@ npm run client2
 
 
 ## TODOs
+- The clients should, on the first run, request the existing distributed order book. They do not do that now.
 - The clients use the [Bittorrent DHT hashing algorithm](./utils.js#L5) to relize a distributed locking which is not ideal.
 - The clients do not handle race condition well due to missing mutex unlocking. See more [here](./network.js#L109).
 - The order matching code does not consider price. So the exchange does not support LIMIT orders.
