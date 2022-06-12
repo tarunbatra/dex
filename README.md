@@ -34,8 +34,13 @@ npm run client2
 
 
 ## TODOs
+
+### Initialization
 - The clients should, on the first run, request the existing distributed order book. They do not do that now.
+
+### Race condition
 - The clients use the [Bittorrent DHT hashing algorithm](./utils.js#L5) to relize a distributed locking which is not ideal.
 - The clients do not handle race condition well due to missing mutex unlocking. See more [here](./network.js#L109).
+
+### Price of trades
 - The order matching code does not consider price. So the exchange does not support LIMIT orders.
-- The clients sometimes have issues broadcasting to each other, I am not sure why, could be race condition due to using the smae name to announce. Need moe time to study the Grenache lib.
