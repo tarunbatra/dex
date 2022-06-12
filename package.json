@@ -4,8 +4,8 @@
   "description": "Decentralized exchange",
   "main": "index.js",
   "scripts": {
-    "client1": "DEBUG=* PORT=3000 node scripts/client1.js",
-    "client2": "DEBUG=* PORT=3001 node scripts/client2.js",
+    "client1": "DEBUG=* node scripts/client1.js",
+    "client2": "DEBUG=* node scripts/client2.js",
     "test": "node test.js"
   },
   "author": "Tarun Batra <tarun.batra00@gmail.com>",

@@ -43,11 +43,11 @@ class Network extends EventEmitter {
               
             this.link.startAnnouncing(Network.Channels.SYNC_ORDER, this.server.port, {}, (err)  => {
                 if (err) {
-                    console.log("err", err)
+                    debug("SERVER", "Error in listening to channel", err)
                 } else {
+                    debug("SERVER", `Listening for requests on ${Network.Channels.SYNC_ORDER}`)
                     this.emit('ready')
                 }
-                debug("SERVER", `Listening for requests on ${Network.Channels.SYNC_ORDER}`)
             })
 
             this.server.on('request', (rid, key, payload, handler) => {
@@ -97,14 +97,14 @@ class Network extends EventEmitter {
             // TODO: Do not use this bittorent inspired method to lock the keys
             const DHTKey = utils.getDhtKey(key)
             // Try to see if the key is already locked
-            this.link.get(DHTKey, {}, (err, locked) => {
+            this.link.get(DHTKey, (err, locked) => {
                 if (err && err.message !== constants.FirstNodeError) {
                     return reject(err)
                 } else if (locked) {
                     return reject(new Error("The key is already locked"))
                 } else {
                     // If the key is not locked, try to acquire the lock
-                    this.link.put(key, {}, (err, hash) => {
+                    this.link.put({ v: key }, (err, hash) => {
                         if (err && err.message !== constants.FirstNodeError) {
                             return reject(err)
                         } else {

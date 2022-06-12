@@ -61,16 +61,17 @@ class Exchange {
     }
 
     async executeOrder(orderId1, orderId2) {
-        if (!this.orderbook.has(orderId1) || !this.orderbook.has(orderId)) {
+        debug(`Executing orders:${orderId1}, ${orderId2}`)
+        if (!this.orderbook.has(orderId1) || !this.orderbook.has(orderId2)) {
             return new Error("Not Found: Order")
         }
         const order1 = this.orderbook.get(orderId1)
         const order2 = this.orderbook.get(orderId2)
 
         // Locking the order is required before changing its state
-        [ lockedOrder1, lockedOrder2 ] = await Promise.all([
-            unlockOrder(order1, this.network),
-            unlockOrder(order2, this.network)
+        const [lockedOrder1, lockedOrder2] = await Promise.all([
+            lockOrder(order1, this.network),
+            lockOrder(order2, this.network)
         ])
         if (!lockedOrder1 || !lockedOrder2) {
             throw new Error("FAILED: Order already under processing")
@@ -85,20 +86,22 @@ class Exchange {
         // TODO: Check for errors here
         await Promise.all([
             unlockOrder(order1, this.network),
-            unlockOrder(order2. this.network)
+            unlockOrder(order2, this.network)
         ])
         return true
     }
 
     async matchOrder(orderToBeMatched, orderbook) {
-        debug(`Matching order ${orderToBeMatched.id} against orderbook`)
         for (const [_, anotherOrder] of orderbook) {
+            // Ignore non pending orders
+            if (anotherOrder.state !== Order.State.PENDING) continue
             // Ignore orders from the same user
-            if (anotherOrder.user == orderToBeMatched.user) continue
+            if (anotherOrder.user === orderToBeMatched.user) continue
             // Ignore orders of the same type
-            if (anotherOrder.type == orderToBeMatched.type) continue
-            await this.executeOrder(orderToBeMatched, anotherOrder)
-            break
+            if (anotherOrder.type === orderToBeMatched.type) continue
+            // Ignore orders which are not for the same ticker
+            if (anotherOrder.ticker !== orderToBeMatched.ticker) continue
+            return await this.executeOrder(orderToBeMatched.id, anotherOrder.id)
         }
     }
 
@@ -127,7 +130,7 @@ async function syncOrder(order, network) {
     try {
         await network.broadcast(Network.Channels.SYNC_ORDER, order)
     } catch (err) {
-        console.error("Error syncing orders to network", err)
+        debug("Error syncing orders to network", err)
     }
 }
 
