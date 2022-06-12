@@ -1,9 +1,9 @@
-const exchange = require('../')
+const dex = require('../')
 const { setTimeout } = require('timers/promises')
-exchange.network.on('ready', async () => {
+dex.network.on('ready', async () => {
     await setTimeout(3000)
-    const order = await exchange.createOrder('BUY', 1, 'BTC', 'xyz.eth')
+    const order = await dex.createOrder('BUY', 1, 'BTC', 'xyz.eth')
     await setTimeout(5000)
-    console.log(exchange.getOrderbook())
+    console.log(dex.getOrderbook())
 })
 
