@@ -120,8 +120,9 @@ class Network extends EventEmitter {
     }
 
     async disconnect() {
-        this.link.stopAnnouncing(this.nodeId, this.service.port)
-        this.link.stop()
+        debug("Disconneting from the network")
+        await this.link.stopAnnouncing(this.nodeId, this.service.port)
+        await this.link.stop()
     }
 }
 

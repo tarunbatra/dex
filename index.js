@@ -1,4 +1,4 @@
-const debug = require('debug')('client')
+const debug = require('debug')('dex:client')
 const config = require('./config')
 const Network = require('./network')
 const Exchange = require('./exchange')
@@ -18,7 +18,7 @@ process.on('uncaughtException', (err) => {
     process.exit(1)
 })
 
-process.on('SIGTERM', () => {
+process.on('SIGINT', () => {
     network.disconnect()
     process.exit()
 })

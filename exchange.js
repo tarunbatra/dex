@@ -22,11 +22,18 @@ class Exchange {
     }
 
     async createOrder(type, quantity, ticker, user) {
-        const order = new Order(type, quantity, ticker, user, this.nodeId)
+        const order = {
+            id: generateOrderId(this.nodeId),
+            type: type,
+            quantity: quantity,
+            ticker: ticker,
+            user: user,
+            state: 'PENDING'
+        }
         debug(`Creating order: ${order.id}`)
         this.orderbook.set(order.id, order)
-        syncOrder(order, this.network)
-        this.matchOrder(order, this.orderbook)
+        await syncOrder(order, this.network)
+        await this.matchOrder(order, this.orderbook)
         return order
     }
 
@@ -66,8 +73,7 @@ class Exchange {
 
     async matchOrder(orderToBeMatched, orderbook) {
         debug(`Matching order ${orderToBeMatched.id} against orderbook`)
-        for (const anotherOrder of orderbook) {
-            console.log(anotherOrder)
+        for (const [_, anotherOrder] of orderbook) {
             // Ignore orders from the same user
             if (anotherOrder.user == orderToBeMatched.user) continue
             // Ignore orders of the same type
